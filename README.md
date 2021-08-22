@@ -1,5 +1,7 @@
 # CarRentBlockChain
-上贸大身份数据统一管理平台
+基于FISCO BCOS（微众联盟链架构）的汽车租赁平台。
+
+实现链上车辆租赁交易的过程。
 
 ## 运行 CarRentBlockChain
 
