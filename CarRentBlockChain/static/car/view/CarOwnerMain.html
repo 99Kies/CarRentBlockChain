@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>车主页面</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/elementui/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+</head>
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>车辆信息展示</h1>
+    </div>
+    <div class="app-container">
+        <div class="box">
+            <div class="filter-container">
+                <el-button @click="backLogin()" class="dalfBut">回到登录页面</el-button>
+                <el-button type="primary" class="butT" @click="handleCreate()">发布车辆</el-button>
+                <el-button type="primary" class="butT" @click="handleQuery()">查询余额</el-button>
+                <el-button type="primary" class="butT" @click="handleQueryCar()">我的车辆</el-button>
+            </div>
+            <h3 style="text-align: center;">所有发布车辆</h3>
+            <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="序号"></el-table-column>
+                <el-table-column prop="chainNumber" label="车链码" align="center"></el-table-column>
+                <el-table-column prop="number" label="车牌号" align="center"></el-table-column>
+                <el-table-column prop="brand" label="车辆品牌" align="center"></el-table-column>
+                <el-table-column prop="color" label="颜色" align="center"></el-table-column>
+                <el-table-column prop="quality" label="品质" align="center"></el-table-column>
+                <el-table-column prop="price" label="价格" align="center"></el-table-column>
+                <el-table-column prop="status" label="租赁情况" align="center"></el-table-column>
+                <el-table-column prop="day" label="租借天数" align="center"></el-table-column>
+            </el-table>
+            <!-- 新增标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="发布新车" :visible.sync="dialogFormVisible">
+                    <el-form ref="dataAddForm" :model="formData"  label-position="right"
+                             label-width="100px">
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="车辆号" prop="number">
+                                    <el-input placeholder="例：WJ粤-12345" v-model="formData.number"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="车辆品牌" prop="brand">
+                                    <el-input placeholder="宝马、奔驰等" v-model="formData.brand"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="颜色" prop="color">
+                                    <el-input placeholder="红、黄等" v-model="formData.color"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="品质" prop="quality">
+                                    <el-input placeholder="A/B/C" v-model="formData.quality"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="价格" prop="price">
+                                    <el-input placeholder="单位ETH" v-model="formData.price"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="租借天数" prop="day">
+                                    <el-input placeholder="单位天" v-model="formData.day"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="20">
+                                <el-form-item label="请输入私钥" prop="privateKey">
+                                    <el-input  v-model="formData.privateKey"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible = false">取消</el-button>
+                        <el-button type="primary" @click="handleAdd()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+
+            <!-- 编辑标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="查询余额" :visible.sync="dialogFormVisible4Edit">
+                    <el-form ref="dataEditForm" :model="formData"  label-position="right"
+                             label-width="150px">
+                        <el-row>
+                            <el-col :span="20">
+                                <el-form-item label="请输入账户地址" prop="address">
+                                    <el-input v-model="formData.address"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible4Edit = false">取消</el-button>
+                        <el-button type="primary" @click="getBalance()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+            <!-- 编辑标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="我的车辆" :visible.sync="dialogFormVisible4Car">
+                    <el-form ref="dataEditForm" :model="formData"  label-position="right"
+                             label-width="150px">
+                        <el-row>
+                            <el-col :span="20">
+                                <el-form-item label="请输入账户地址" prop="address">
+                                    <el-input v-model="formData.address"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible4Edit = false">取消</el-button>
+                        <el-button type="primary" @click="getCarInfo()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!-- 引入组件库 -->
+<script src="../js/vue.js"></script>
+<script src="../plugins/elementui/index.js"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data: {
+            dataList: [],//当前页要展示的分页列表数据
+            myDataList: [],
+            formData: {
+                car:{},
+                privateKey:"",
+                address:""
+            },//表单数据
+            dialogFormVisible: false,//增加表单是否可见
+            dialogFormVisible4Edit: false,//编辑表单是否可见
+            dialogFormVisible4Car:false
+        },
+        //钩子函数，VUE对象初始化完成后自动执行
+        created() {
+            this.findPage();
+        },
+        methods: {
+            //分页查询
+            findPage() {
+                // 发送查询的请求，提交pagination(currentPage,pageSize)
+                axios.get('/contract/carList').then(res => {
+                    if (res.data.flag) {
+                        // 绑定数据
+                        //res.data => result {flag, message,data}
+                        // result.data = pageResult {total, rows}
+                        this.dataList = res.data.data;
+                        // 总计录数
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                })
+            },
+            // 重置表单
+            resetForm() {
+                this.formData = {};
+            },
+            // 弹出添加窗口
+            handleCreate() {
+                this.resetForm();
+                this.dialogFormVisible = true;
+            },
+            // 弹出查询窗口
+            handleQuery() {
+                this.resetForm();
+                this.dialogFormVisible4Edit = true;
+            },
+            handleQueryCar(){
+                this.resetForm();
+                this.dialogFormVisible4Car = true;
+            },
+            getCarInfo(){
+                axios.post("/contract/getCar?account="+this.formData.address).then(res=>{
+                    if (res.data.flag) {
+                        this.$message({
+                            message:"车链码:"+res.data.data.chainNumber+"\n"+
+                                    "车牌号:"+res.data.data.number+"\n"+
+                                    "车辆品牌:"+res.data.data.brand+"\n"+
+                                    "车辆价格:"+res.data.data.price+"\n"+
+                                    "租用天数:"+res.data.data.day+"\n"+
+                                    "租用状态:"+res.data.data.status+"\n"+
+                                    "车辆颜色:"+res.data.data.color+"\n"+
+                                    "车辆质量:"+res.data.data.quality+"\n",
+                            type: 'success',
+                            showClose: true,
+                            duration: 0
+                        })
+                        this.dialogFormVisible4Car = false;
+                    }else{
+                        this.dialogFormVisible4Car = false;
+                        this.$message.error(res.data.message);
+                    }
+                })
+            },
+            //添加
+            handleAdd() {
+                this.$refs['dataAddForm'].validate((valid) => {
+                    if (valid) {
+                        axios.post("/contract/newVehicle", this.formData).then((res => {
+                            //隐藏新窗口
+                            this.dialogFormVisible = false;
+                            if (res.data.flag) {
+                                this.$message({
+                                    message: res.data.message,
+                                    type: 'success'
+                                });
+                                this.findPage();
+                            } else {
+                                this.$message({
+                                    message: res.data.message,
+                                    type: 'error'
+                                });
+                            }
+                        }))
+                    } else {
+                        this.$message.error("表单数据校验失败");
+                        return false;
+                    }
+                })
+            },
+            backLogin() {
+                location.href = "login.html";
+            },
+            getBalance() {
+                this.$refs['dataEditForm'].validate((valid) => {
+                    axios.post("/user/getBalance?address=" + this.formData.address).then(res => {
+                        if (res.data.flag) {
+                            this.dialogFormVisible4Edit=false;
+                            this.$message({
+                                message: "您的余额为：" + res.data.data,
+                                type: 'success',
+                                showClose: true,
+                                duration: 0
+                            })
+                        }
+                    })
+                })
+            },
+
+        }
+    })
+</script>
+</html>

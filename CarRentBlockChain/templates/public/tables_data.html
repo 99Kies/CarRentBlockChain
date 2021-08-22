@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ViewUI example</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link
+            rel="stylesheet"
+            type="text/css"
+            href="../../static/build/main_css.bundle.css"
+    />
+
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+    <script src="../../static/build/assets/vendor/jquery/jquery.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            text-align: left;
+            background-color: #fff;
+        }
+
+        .bg-dark {
+            background-color: #343a40 !important;
+        }
+
+        .navbar {
+            position: relative;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            -ms-flex-align: center;
+            align-items: center;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+        }
+        .navbar-expand-lg {
+
+            flex-flow: row nowrap;
+
+            justify-content: flex-start;
+        }
+        .fixed-top {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1030;
+        }
+        .navbar-nav {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            padding-left: 0;
+            margin-bottom: 0;
+            list-style: none;
+        }
+
+        /*a  upload */
+        .a-upload {
+            padding: 12px 12px;
+
+            line-height: 20px;
+            position: relative;
+            cursor: pointer;
+            color: #888;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+
+            display: inline-block;
+            *display: inline;
+            *zoom: 1
+
+
+
+        }
+
+        .a-upload  input {
+            position: absolute;
+            right: 0;
+            top:0;
+            height: 45px;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            cursor: pointer;
+
+
+        }
+
+        .a-upload:hover {
+            color: #444;
+            background: #eee;
+            border-color: #ccc;
+            text-decoration: none
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top ">
+    <a class="navbar-brand" href="/">
+        SUIBE DID Data Manager
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item ">
+                <a class="nav-link" href="{{ url_for('public.home') }}">主面板
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            {% if current_user and current_user.is_authenticated %}
+
+            {% endif %}
+
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('public.Identity_manager') }}">DID身份数据管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('public.Visualization_tools') }}">身份/数据/凭证可视化查看</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('public.about') }}">数据共享</a>
+            </li>
+
+
+        </ul>
+        <ul class="navbar-nav my-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/user/">Logged in as admin</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout/">
+                    <i class="fa fa-sign-out"></i>
+                </a>
+            </li>
+        </ul>
+
+    </div><!-- /.navbar-collapse -->
+</nav>
+<main role="main">
+    <div class="jumbotron">
+        <div class="container">
+
+            <h4 class="display-4">欢迎访问<br>SUIBE DID Data Manager！</h4>
+
+            <p><a href="" class="btn btn-primary btn-large">查看 Github 源码……</a></p>
+        </div>
+    </div><!-- /.jumbotron -->
+    <section class="body">
+
+        <div class="container" id="app">
+
+            <!-- start: page -->
+            <section class="panel">
+                <header class="panel-heading">
+
+                    <h2 class="panel-title">DID身份管理</h2>
+                </header>
+                <br>
+                <el-divider></el-divider>
+                <br>
+                <div class="panel-body">
+
+
+                    <div class="row">
+                        <div class="col-sm-6">
+
+
+                            <!-- <button  class="btn btn-primary" onclick="downloadDoc()">导出 Document<i class="fa fa-inbox "></i></button>-->
+                            <a href="javascript:;" class="a-upload">
+                                <input type="file"  onchange="upload(this)" />导入凭证
+                            </a>
+
+                            {#                                <button  type="button" class="btn btn-primary" @click="daoru()" > <i class="fa fa-plus"></i>导入</button>#}
+                            <a  class="btn btn-primary" href="{{ url_for('public.Identity_manager') }}">返回 <i class="fa fa-forward"></i></a>
+                        </div>
+
+                    </div>
+
+                </div>
+                <!--列表-->
+                <el-table :data="users.slice((page-1)*pagesize,page*pagesize)"  highlight-current-row v-loading="listLoading"  style="width: 100%;"   class="userTableJs"   ref="table">
+
+                    <el-table-column type="index" label="序号" width="60">
+                    </el-table-column>
+                    <el-table-column prop="credentialID" label="ID" width="420">
+                    </el-table-column>
+                    <el-table-column prop="is_cochain" label="ChainState" width="100">
+                    </el-table-column>
+                    <el-table-column prop="type" label="type" width="100" >
+                    </el-table-column>
+                    <el-table-column prop="issuanceDate" label="Issue Time" width="220" >
+                    </el-table-column>
+                    <el-table-column label="操作" align="center" width="140">
+                        　　　　<template slot-scope="scope">
+                        　　　　　　<el-button class="btn btn-outline-secondary" style="margin-left: 10px;margin-top: 5px" type="info"  @click="checkdetail(scope.row.credentialID)" >详情</el-button>
+                        　　　　　　<el-button class="btn btn-outline-secondary" style="margin-left: 10px;margin-top: 2px" type="info" @click="deleteUser(scope.row.credentialID)">删除</el-button>
+                                 <el-button class="btn btn-outline-secondary" style="margin-top: 2px" type="info" @click="exportCre(scope.row.credentialID)">导出</el-button>
+                                 <el-button class="btn btn-outline-secondary" style="margin-left: 10px;margin-top: 2px" type="info" @click="uploadCre(scope.row.credentialID)">上链</el-button>
+                                <el-button class="btn btn-outline-secondary" style="margin-left: 10px;margin-top: 2px;" type="info" @click="checkData(scope.row.credentialID)">查看数据</el-button>
+                        　　　　</template>
+                    </el-table-column>
+
+
+                </el-table>
+                <!--工具条-->
+                <el-col :span="24" class="el-table_footertoolbar">
+                    <el-pagination layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange" @current-change="handleCurrentChange" :page-sizes="[10, 20, 50, 100]" :page-size="pagesize" :total="users.length" style="float:right;">
+                    </el-pagination>
+                </el-col>
+
+                <el-dialog title="凭证所关联数据" :visible.sync="addFormVisible">
+                    <el-table :data="data"  highlight-current-row v-loading="listLoading"  style="width: 100%;"   class="userTableJs"   ref="table">
+
+                        <el-table-column type="index" label="序号" width="60">
+                        </el-table-column>
+                        <el-table-column prop="addr" label="链上地址" width="420">
+                        </el-table-column>
+                        <el-table-column prop="record" label="记录值" width="400">
+                        </el-table-column>
+                        <el-table-column prop="owner" label="记录人" width="100" >
+                        </el-table-column>
+                        <el-table-column prop="datetime" label="时间戳" width="220" >
+                        </el-table-column>
+
+                    </el-table>
+
+                </el-dialog>
+
+
+
+            </section>
+            <!-- end: page -->
+
+        </div>
+    </section>
+
+</main>
+
+</body>
+<script>
+    function upload(input) {
+        //支持chrome IE10
+        if (window.FileReader) {
+            var file = input.files[0];
+            filename = file.name.split(".")[0];
+            var reader = new FileReader();
+            reader.onload = function() {
+                var credential=this.result;
+                console.log(JSON.stringify(credential))
+                $.ajax({
+                    type:"post",
+                    url:"http://127.0.0.1:5000/blockchain/load_credential_pojo/",
+                    dataType:'json',
+                    contentType : "application/json",
+                    data:credential,
+                    async:true,
+                    timeout:3000,  //timeout:响应超时时间，非必须参数
+                    beforeSend:function(){
+                        //这里是发送请求之前所要进行的操作
+                    },
+                    success:function(){
+                        //请求成功
+
+                        location.reload();
+                        alert("success!")
+                    },
+                    error:function(){
+                        alert("数据存在问题!")
+                    }
+                });
+
+            }
+            reader.readAsText(file);
+        }
+        else {
+            alert('error');
+        }
+    }
+
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                filters: {
+                    name: ''
+                },
+                users: [],//表格数据
+                page: 1,//当前页数
+                pagesize: 10,//一页显示几条
+                listLoading: false,
+                sels: [],//列表选中列
+                total: 0,
+                editFormVisible: false,//编辑界面是否显示
+                editLoading: false,
+                editFormRules: {
+                    name: [{required: true, message: '请输入姓名', trigger: 'blur'}],
+                    birth: [{type: 'date', required: true, message: '日期必须填写', trigger: 'change'}]
+                },
+                editForm: {
+                    id:undefined,
+                    name: '',
+                    sex:-1,
+                    age: 0,
+                    birth:new Date(),
+                    addr: ''
+                },
+
+                addFormVisible: false,//新增界面是否显示
+                addLoading: false,
+                addFormRules: {
+                    name: [{ required: true, message: '请输入姓名', trigger: 'blur' },],
+                    birth: [{ type: 'date', required: true, message: '日期必须填写', trigger: 'change' }]
+                },
+                //新增界面数据
+                addForm: {
+                    name: '',
+                    sex: -1,
+                    age: 0,
+                    birth: new Date(),
+                    addr: ''
+                },
+                arrID:[],
+                data:[],
+
+
+            }
+
+        },
+
+        methods: {
+            handleSizeChange(size){
+                this.pagesize = size;
+            },
+            handleCurrentChange(val) {
+                this.page = val;
+                this.getUsers();
+            },
+            handleRowChange(row, event, column){
+                var same=false;
+                if(this.arrID.length > 0){
+                    for(var i=0; i<this.arrID.length ;i++){
+                        if(this.arrID[i]==row.id){
+                            same=true;
+                            this.removeByValue(this.arrID, row.id);
+                            break;
+                        }
+                    }
+                    if(same==true){
+                        this.$refs.table.toggleRowSelection(row,false);
+                    }else{
+                        this.$refs.table.toggleRowSelection(row,true);
+                        this.arrID.push(row.id);
+                    }
+                }else{
+                    this.$refs.table.toggleRowSelection(row,true);
+                    this.arrID.push(row.id);
+                }
+            },
+            checkData: function(val){
+                this.addFormVisible=true
+                this.$http.get('http://127.0.0.1:5000/data_manager/list_data').then(result =>{
+                    console.log(result.data)
+                    this.data=result.data
+
+                }).catch(() => {
+
+                });
+            },
+            //获取用户列表
+            getUsers() {
+                var did = localStorage.getItem("did");
+
+                this.$http.get('http://127.0.0.1:5000/blockchain/get_credential_pojo_by_claim_id/'+did).then(function(res){
+                    this.users=res.data.result;
+
+                },function(){
+                    console.log('请求失败处理');
+                });
+
+
+
+            },
+
+            exportCre:function(val) {
+
+                //调接口获取后台json数据
+                this.$http.get("http://127.0.0.1:5000/blockchain/get_credential_pojo_by_credential_id/"+val).then((res)=>{
+                    let data =JSON.stringify(res.data.result);
+                    console.log(data)
+                    let blob = new Blob([data],{type: 'text/plain;charset=UTF-8'}),
+                        fileName = 'credential.json';
+                    const link = document.createElement('a'); // 创建a标签
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = fileName;
+                    link.click(); // 模拟点击a标签
+                    window.URL.revokeObjectURL(link.href);
+                }).catch((err)=>{
+                })
+            },
+            uploadCre:function(val){
+                this.$http.post('http://127.0.0.1:5000/blockchain/uplink_credential/'+val).then(result =>{
+                    alert("上链成功")
+                    this.getUsers();
+
+                })
+            },
+
+            //检索
+            btnSearch(){
+                console.log('检索')
+                var searchParams = { name: this.filters.name, sex: this.filters.sex };
+
+                //searchUser(searchParams).then(data => {
+
+                //});
+            },
+            //重置
+            btnReset(){
+                this.resetForm(".userform");
+            },
+            //新增
+
+
+            deleteUser: function (val){
+                var ids = val;
+                if(ids ==''){
+                    this.$alert('请选择要删除的记录', '提示', {
+                        dangerouslyUseHTMLString: true
+                    });
+                }else{
+                    this.$confirm('确认删除选中记录吗？', '提示', {
+                        type: 'warning'
+                    }).then(() => {
+                        console.log(this.page)
+                        this.$http.post('http://127.0.0.1:5000/blockchain/delete_local_credential_pojo/'+ids).then(result =>{
+                            this.getUsers();
+                        })
+                    }).catch(() => {
+
+                    });
+                }
+            },
+            checkdetail:function (val){
+                console.log(val)
+                localStorage.setItem("creid", val);
+                var a = document.createElement('a');
+                a.setAttribute('href', "{{ url_for('public.certificate') }}");
+                a.setAttribute('id', 'js_a');
+                //防止反复添加
+                if(document.getElementById('js_a')) {
+                    document.body.removeChild(document.getElementById('js_a'));
+                }
+                document.body.appendChild(a);
+                a.click();
+            },
+            //新增
+            addSubmit: function () {
+                this.$refs.addForm.validate((valid) => {
+                    if (valid) {
+                        this.$confirm('确认提交吗？', '提示', {}).then(() => {
+                            this.addLoading = true;
+                            //NProgress.start();
+                            let para = Object.assign({}, this.addForm);
+                            para.birth = (!para.birth || para.birth == '') ? '' : util.formatDate.format(new Date(para.birth), 'yyyy-MM-dd');
+                            addUser(para).then((res) => {
+                                this.addLoading = false;
+                                //NProgress.done();
+                                this.$message({
+                                    message: '提交成功',
+                                    type: 'success'
+                                });
+                                this.$refs['addForm'].resetFields();
+                                this.addFormVisible = false;
+                                this.getUsers();
+                            });
+                        });
+                    }
+                });
+            },
+
+        },
+        mounted() {
+            this.getUsers();
+            window.getUsers = this.getUsers();
+            console.log("结果3"+this.users.length)
+
+        }
+
+    })
+</script>
+</html>

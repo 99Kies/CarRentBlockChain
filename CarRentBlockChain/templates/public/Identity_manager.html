@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ViewUI example</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link
+            rel="stylesheet"
+            type="text/css"
+            href="../../static/build/main_css.bundle.css"
+    />
+
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top ">
+    <a class="navbar-brand" href="/">
+        SUIBE DID Data Manager
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item ">
+                <a class="nav-link" href="{{ url_for('public.home') }}">主面板
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            {% if current_user and current_user.is_authenticated %}
+
+            {% endif %}
+
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('public.Identity_manager') }}">DID身份数据管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('public.Visualization_tools') }}">身份/数据/凭证可视化查看</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('public.about') }}">数据共享</a>
+            </li>
+
+
+        </ul>
+        <ul class="navbar-nav my-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/user/">Logged in as admin</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout/">
+                    <i class="fa fa-sign-out"></i>
+                </a>
+            </li>
+        </ul>
+
+    </div><!-- /.navbar-collapse -->
+</nav>
+<main role="main">
+    <div class="jumbotron">
+        <div class="container">
+
+            <h4 class="display-4">欢迎访问<br>SUIBE DID Data Manager！</h4>
+
+            <p><a href="" class="btn btn-primary btn-large">查看 Github 源码……</a></p>
+        </div>
+    </div><!-- /.jumbotron -->
+    <section class="body">
+
+        <div class="container" id="app">
+
+            <!-- start: page -->
+            <section class="panel">
+                <header class="panel-heading">
+
+                    <h2 class="panel-title">DID身份管理</h2>
+                </header>
+                <br>
+                <el-divider></el-divider>
+                <br>
+                <div class="panel-body">
+
+
+                    <el-col :span="24"  height="900"
+                            style="width: 1200px">
+                        <el-form :inline="true" :model="filters" class="userform" label-width="50px">
+
+
+                            <el-button split-button type="primary" @click="btnNew" trigger="click">
+                                导入DID
+
+                            </el-button>
+                        </el-form>
+                    </el-col>
+                    <!--列表-->
+                    <el-table :data="users.slice((page-1)*pagesize,page*pagesize)"  highlight-current-row v-loading="listLoading"  style="width: 100%;"   class="userTableJs"   ref="table">
+
+                        <el-table-column type="index" label="序号" width="60">
+                        </el-table-column>
+                        <el-table-column prop="did" label="DID" width="420">
+                        </el-table-column>
+                        <el-table-column prop="chain_name" label="chain_name" width="150">
+                        </el-table-column>
+
+                        <el-table-column prop="type" label="type" width="100" >
+                        </el-table-column>
+                        <el-table-column prop="is_cochain" label="ChainState" width="100" >
+                        </el-table-column>
+
+                        <el-table-column label="操作" align="center" min-width="100">
+                            　　　　<template slot-scope="scope">
+                            　　　　　　<el-button  type="text" @click="checkdetail(scope.row.did)" style="margin-left: 10px;" >DID详情</el-button>
+                            　　　　　　<el-button class="btn btn-outline-secondary" style="margin-top: 5px" type="info" @click="deleteUser(scope.row.did)">删除</el-button>
+                            <el-button class="btn btn-outline-secondary" style="margin-top: 5px" type="info" @click="toChain(scope.row.did)">上链</el-button>
+                            　　　　</template>
+                        </el-table-column>
+
+                    </el-table>
+                    <!--工具条-->
+                    <el-col :span="24" class="el-table_footertoolbar">
+                        <el-pagination layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange" @current-change="handleCurrentChange" :page-sizes="[10, 20, 50, 100]" :page-size="pagesize" :total="users.length" style="float:right;">
+                        </el-pagination>
+                    </el-col>
+                    <!--新增界面-->
+                    <el-dialog title="导入DID" :visible.sync="addFormVisible">
+                        <el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
+                            <el-form-item label="私钥" prop="privKey">
+                                <el-input v-model="addForm.privkey" auto-complete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="DID类型">
+                                <el-radio-group v-model="addForm.sex">
+                                    <el-radio class="radio" :label="-1">WeID</el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+
+                        </el-form>
+                        <div slot="footer" class="dialog-footer">
+                            <el-button @click.native="addFormVisible = false">取消</el-button>
+                            <el-button type="primary" @click.native="addSubmit" :loading="addLoading">提交</el-button>
+                        </div>
+                    </el-dialog>
+
+                    <el-dialog title="DID上链" :visible.sync="upFormVisible">
+                        <el-form :model="upForm" label-width="80px"  ref="upForm">
+                            <el-form-item label="DID" >
+                                <el-input v-model="upForm.did" auto-complete="off" readonly="readonly"></el-input>
+                            </el-form-item>
+                            <el-form-item label="chainID" >
+                                <el-input v-model="upForm.chainID" auto-complete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="链备注" >
+                                <el-input v-model="upForm.chainName" auto-complete="off"></el-input>
+                            </el-form-item>
+
+
+                        </el-form>
+                        <div slot="footer" class="dialog-footer">
+                            <el-button @click.native="addFormVisible = false">取消</el-button>
+                            <el-button type="primary" @click.native="upSubmit" :loading="addLoading">提交</el-button>
+                        </div>
+                    </el-dialog>
+
+
+                </div>
+
+            </section>
+            <!-- end: page -->
+
+        </div>
+    </section>
+
+</main>
+
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                filters: {
+                    name: ''
+                },
+                users: [],//表格数据
+                page: 1,//当前页数
+                pagesize: 10,//一页显示几条
+                listLoading: false,
+                sels: [],//列表选中列
+                total: 0,
+                editFormVisible: false,//编辑界面是否显示
+                editLoading: false,
+                editFormRules: {
+                    name: [{required: true, message: '请输入姓名', trigger: 'blur'}],
+                    birth: [{type: 'date', required: true, message: '日期必须填写', trigger: 'change'}]
+                },
+                editForm: {
+                    id:undefined,
+                    name: '',
+                    sex:-1,
+                    age: 0,
+                    birth:new Date(),
+                    addr: ''
+                },
+
+                addFormVisible: false,//新增界面是否显示
+                upFormVisible:false,
+                addLoading: false,
+                addFormRules: {
+                    name: [{ required: true, message: '请输入姓名', trigger: 'blur' },],
+                    birth: [{ type: 'date', required: true, message: '日期必须填写', trigger: 'change' }]
+                },
+                //新增界面数据
+                addForm: {
+                    privkey: '',
+                    sex: -1,
+                },
+                upForm:{
+                    chainID:'',
+                    chainName:'',
+                    did:''
+                },
+                arrID:[],
+
+
+            }
+
+        },
+
+        methods: {
+            handleSizeChange(size){
+                this.pagesize = size;
+            },
+            handleCurrentChange(val) {
+                this.page = val;
+                this.getUsers();
+            },
+            handleRowChange(row, event, column){
+                var same=false;
+                if(this.arrID.length > 0){
+                    for(var i=0; i<this.arrID.length ;i++){
+                        if(this.arrID[i]==row.id){
+                            same=true;
+                            this.removeByValue(this.arrID, row.id);
+                            break;
+                        }
+                    }
+                    if(same==true){
+                        this.$refs.table.toggleRowSelection(row,false);
+                    }else{
+                        this.$refs.table.toggleRowSelection(row,true);
+                        this.arrID.push(row.id);
+                    }
+                }else{
+                    this.$refs.table.toggleRowSelection(row,true);
+                    this.arrID.push(row.id);
+                }
+            },
+
+
+            //获取用户列表
+            getUsers() {
+
+                this.$http.get('http://127.0.0.1:5000/auth_manager/get_user_did/').then(function(res){
+                    this.users=res.data.result;
+
+                },function(){
+                    console.log('请求失败处理');
+                });
+
+
+
+            },
+
+
+
+            deleteUser: function (val){
+                var ids = val;
+                if(ids ==''){
+                    this.$alert('请选择要删除的记录', '提示', {
+                        dangerouslyUseHTMLString: true
+                    });
+                }else{
+                    this.$confirm('确认删除选中记录吗？', '提示', {
+                        type: 'warning'
+                    }).then(() => {
+                        console.log(val)
+                        this.$http.post('http://127.0.0.1:5000/auth_manager/delete_did/'+val).then(result =>{
+                            this.getUsers();
+                        })
+                    }).catch(() => {
+
+                    });
+                }
+            },
+            checkdetail:function (val){
+                localStorage.setItem("did", val);
+                var a = document.createElement('a');
+                a.setAttribute('href', "{{ url_for('public.tables_data') }}");
+                a.setAttribute('id', 'js_a');
+                //防止反复添加
+                if(document.getElementById('js_a')) {
+                    document.body.removeChild(document.getElementById('js_a'));
+                }
+                document.body.appendChild(a);
+                a.click();
+            },
+            toChain:function (val){
+                console.log(val)
+                this.upForm.did=val;
+                this.upFormVisible=true;
+
+            },
+            //新增
+            btnNew(){
+                this.addFormVisible = true;
+            },
+            upSubmit: function () {
+                this.upFormVisible=false;
+                this.$http.post('http://127.0.0.1:5000/auth_manager/uplink_did/'+this.upForm.did,
+                    JSON.stringify({"chain_id":this.upForm.chainID,"chain_name":this.upForm.chainName}),{
+                        emulateJSON:true
+                    }).then(result => {
+                    alert("上链成功")
+                    this.getUsers();
+                })
+            },
+            addSubmit: function () {
+                this.$refs.addForm.validate((valid) => {
+                    if (valid) {
+                        this.$confirm('确认提交吗？', '提示', {}).then(() => {
+                            this.addLoading = true;
+                            let para = Object.assign({}, this.addForm);
+                            let priv ={"privkey":para.privkey}
+                            console.log(priv)
+                            this.$http.get('http://127.0.0.1:5000/did_engine/create_weid_local_func',{params:priv}).then(result =>{
+                                this.addLoading=false;
+                                this.addFormVisible=false;
+                                this.addForm={};
+                                alert("导入成功")
+                                this.getUsers();
+                            }).catch(() => {
+                                alert("导入失败")
+                                this.addLoading=false;
+                            });
+
+
+
+                        });
+                    }
+                });
+            },
+
+        },
+        mounted() {
+            this.getUsers();
+
+
+        }
+
+    })
+</script>
+</html>

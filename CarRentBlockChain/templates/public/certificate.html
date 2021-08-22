@@ -1,0 +1,140 @@
+<html>
+<head>
+    <script src="../../static/credential/vue.min.js"></script>
+    <script src="../../static/credential/axios.min.js"></script>
+    <script src="../../static/build/assets/vendor/jquery/jquery.js"></script>
+    <script
+            src="../../static/credential/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"
+    ></script>
+    <script
+            src="../../static/credential/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"
+    ></script>
+    <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous"
+    />
+    <title>证书模板_Bootstrap Version</title>
+</head>
+<body>
+<div id="main">
+    <br>
+    <div id="cert_div" v-bind:style="cert_div_style">
+        <table class="table" id="cert_table" v-bind:style="cert_table_style">
+            <thead>
+            <tr class="bg-info">
+                <th scope="col" colspan="2" ><center><div id="type"></div></center></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td >age:</td>
+                <td id="age"></td>
+            </tr>
+            <tr>
+                <td >gender:</td>
+                <td id="gender"></td>
+            </tr>
+            <tr>
+                <td >name:</td>
+                <td id="name"></td>
+            </tr>
+            <tr>
+                <td >weid:</td>
+                <td id="weid"></td>
+            </tr>
+            <tr>
+                <td>cptid:</td>
+                <td id="cptid"></td>
+            </tr>
+            <tr>
+                <td>credentialID:</td>
+                <td id="creid"></td>
+            </tr>
+            <tr>
+                <td>expirationDate:</td>
+                <td id="exDate"></td>
+            </tr>
+            <tr>
+                <td>issuanceDate:</td>
+                <td id="IssDate"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><b><center>&gt;&gt;&gt;Other Infomation&lt;&lt;&lt;</center></b></td>
+            </tr>
+            <tr>
+                <td>创建者:</td>
+                <td id="creator"></td>
+            </tr>
+            <tr>
+                <td>签名值: </td>
+                <td id="sig"></td>
+            </tr>
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+<script>
+    var datajson;
+    var creid=localStorage.getItem("creid");
+    $.ajax({
+        type:"get",
+        url:'http://127.0.0.1:5000/blockchain/get_credential_pojo_by_credential_id/'+creid,
+        async:true,
+        success:function(res){
+            datajson=res.result
+            console.log(datajson)
+            document.getElementById("type").innerHTML = datajson.type;
+            document.getElementById("age").innerHTML = datajson.claim.age;
+            document.getElementById("name").innerHTML = datajson.claim.name;
+            document.getElementById("gender").innerHTML = datajson.claim.gender;
+            document.getElementById("weid").innerHTML = datajson.claim.age;
+            document.getElementById("creid").innerHTML = datajson.credentialID;
+            document.getElementById("cptid").innerHTML = datajson.cptId;
+            document.getElementById("exDate").innerHTML = datajson.expirationDate;
+            document.getElementById("IssDate").innerHTML = datajson.issuanceDate;
+            document.getElementById("creator").innerHTML = datajson.proof.creator;
+            document.getElementById("sig").innerHTML = datajson.proof.signatureValue;
+            //请求成功
+        },
+        error:function(){
+            //请求失败
+        }
+    });
+    var vue_things=new Vue({
+        delimiters: ['{[', ']}'],
+        el:'#main',
+        data:
+            {
+                // styles
+                cert_div_style :{
+                    display: 'flex',
+                    justifyContent: 'center'
+                },
+                cert_table_style: {
+                    width: '50%',
+
+                },
+                cert_table_td_style: {
+                    width: '10%',
+                },
+                cert_table_td_content_style: {
+                    wordWrap: "break-word",
+                    wordBreak: "break-all",
+                },
+
+            },
+
+    })
+
+
+</script>
+</body>
+<html>

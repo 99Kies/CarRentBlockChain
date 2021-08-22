@@ -1,0 +1,19 @@
+html,body {
+    /* overflow-y: scroll; */
+    margin: 0;
+
+}
+#app{
+    /*width: 700px;*/
+    /*height:400px;*/
+    /*margin:150px auto*/
+}
+
+.user{
+    background-color: #fff;
+    height: 600px;
+}
+.carOwner{
+    background-color: #fff;
+    height: 300px;
+}

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>用户页面</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/elementui/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+</head>
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>车辆信息展示</h1>
+    </div>
+    <div class="app-container">
+        <div class="box">
+            <div class="filter-container">
+                <el-button  class="butT" @click="backLogin()">回到主页登录</el-button>
+                <el-button type="primary" class="butT" @click="handleQuery()">查询余额</el-button>
+                <el-button type="primary" class="butT" @click="handleUser()">查询租车情况</el-button>
+            </div>
+            <h3 style="text-align: center;">所有发布车辆</h3>
+            <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="序号"></el-table-column>
+                <el-table-column prop="chainNumber" label="车链码" align="center"></el-table-column>
+                <el-table-column prop="number" label="车牌号" align="center"></el-table-column>
+                <el-table-column prop="brand" label="车辆品牌" align="center"></el-table-column>
+                <el-table-column prop="color" label="颜色" align="center"></el-table-column>
+                <el-table-column prop="quality" label="品质" align="center"></el-table-column>
+                <el-table-column prop="price" label="价格(ETH)" align="center"></el-table-column>
+                <el-table-column prop="status" label="租赁情况" align="center"></el-table-column>
+                <el-table-column prop="day" label="租借天数" align="center"></el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-button size="mini" type="danger" @click="handleRent(scope.row)">租用</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <h3 style="text-align: center;">我租用的车辆</h3>
+            <el-table size="small" current-row-key="id" :data="myDataList" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="序号"></el-table-column>
+                <el-table-column prop="chainNumber" label="车链码" align="center"></el-table-column>
+                <el-table-column prop="number" label="车牌号" align="center"></el-table-column>
+                <el-table-column prop="brand" label="车辆品牌" align="center"></el-table-column>
+                <el-table-column prop="color" label="颜色" align="center"></el-table-column>
+                <el-table-column prop="quality" label="品质" align="center"></el-table-column>
+                <el-table-column prop="price" label="价格(ETH)" align="center"></el-table-column>
+                <el-table-column prop="status" label="租赁情况" align="center"></el-table-column>
+                <el-table-column prop="day" label="租借天数" align="center"></el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-button size="mini" type="danger" @click="RebackCar(scope.row)">还车</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <!-- 编辑标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="查询余额" :visible.sync="dialogFormVisible4Edit">
+                    <el-form ref="dataEditForm" :model="formData"  label-position="right"
+                             label-width="150px">
+                        <el-row>
+                            <el-col :span="20">
+                                <el-form-item label="请输入账户地址" prop="address">
+                                    <el-input v-model="formData.address"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible4Edit = false">取消</el-button>
+                        <el-button type="primary" @click="getBalance()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+            <div class="add-form">
+                <el-dialog title="查询租车情况" :visible.sync="dialogFormVisible4User">
+                    <el-form ref="dataUserForm" :model="formData"  label-position="right"
+                             label-width="150px">
+                        <el-row>
+                            <el-col :span="20">
+                                <el-form-item label="请输入账户私钥" prop="privateKey">
+                                    <el-input v-model="formData.privateKey"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible4User = false">取消</el-button>
+                        <el-button type="primary" @click="getUserCar()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+            <div class="add-form">
+                <el-dialog title="租用" :visible.sync="dialogFormVisible4Rent">
+                    <el-form ref="dataRentForm" :model="signCarFormData"  label-position="right"
+                             label-width="150px">
+                        <el-row>
+                            <el-col :span="20">
+                                <el-form-item label="请输入私钥地址" prop="privateKey">
+                                    <el-input v-model="signCarFormData.privateKey"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible4Rent = false">取消</el-button>
+                        <el-button type="primary" @click="trueRent()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+            <div class="add-form">
+                <el-dialog title="还车" :visible.sync="dialogFormVisible4Reback">
+                    <el-form ref="dataRebackForm" :model="formData"  label-position="right"
+                             label-width="150px">
+                        <el-row>
+                            <el-col :span="20">
+                                <el-form-item label="请输入私钥地址" prop="privateKey">
+                                    <el-input v-model="formData.privateKey"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible4Reback = false">取消</el-button>
+                        <el-button type="primary" @click="trueReback()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!-- 引入组件库 -->
+<script src="../js/vue.js"></script>
+<script src="../plugins/elementui/index.js"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data: {
+            chainNumber:0,
+            dataList: [],//当前页要展示的分页列表数据
+            myDataList:[],
+            formData: {},//表单数据
+            signCarFormData:{},
+            dialogFormVisible4Rent: false,//增加表单是否可见
+            dialogFormVisible4Edit: false,//编辑表单是否可见
+            dialogFormVisible4User:false,
+            dialogFormVisible4Reback:false
+        },
+        //钩子函数，VUE对象初始化完成后自动执行
+        created() {
+            this.findPage();
+        },
+        methods: {
+            //分页查询
+            findPage() {
+                // 发送查询的请求，提交pagination(currentPage,pageSize)
+                axios.get('/contract/carList').then(res => {
+                    if (res.data.flag) {
+                        // 绑定数据
+                        //res.data => result {flag, message,data}
+                        // result.data = pageResult {total, rows}
+                        this.dataList = res.data.data;
+                        // 总计录数
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                })
+            },
+            backLogin() {
+                location.href = "login.html";
+            },
+            // 重置表单
+            resetForm() {
+                this.formData = {};
+            },
+            handleQuery() {
+                this.resetForm();
+                this.dialogFormVisible4Edit = true;
+            },
+            handleRentCreate() {
+                this.resetForm();
+                this.dialogFormVisible4Rent = true;
+            },
+            handleUser(){
+                this.resetForm();
+                this.dialogFormVisible4User = true;
+            },
+            RebackCar(row){
+                this.chainNumber=row.chainNumber;
+                this.$confirm('此操作将还车, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.resetForm();
+                    this.dialogFormVisible4Reback = true;
+                    // 点击确定后调用
+                }).catch(() => {
+                    // 点击取消后调用
+                    // 空着，防止报错
+                });
+            },
+            trueReback(){
+                this.$refs['dataRebackForm'].validate((valid) => {
+                    axios.post("/contract/rebackVehicle?chainNumber="+this.chainNumber
+                        +"&"+"privateKey="+this.formData.privateKey).then(res=>{
+                        if (res.data.flag) {
+                            this.$message.success(res.data.message);
+                        }else{
+                            this.$message.error(res.data.message);
+                        }
+                    })
+                    this.dialogFormVisible4Reback = false;
+                    this.myDataList={};
+                    this.findPage();
+                });
+
+            },
+            getUserCar(){
+                this.$refs['dataUserForm'].validate((valid) => {
+                    this.dialogFormVisible4User=false;
+                    axios.post("/user/getCar?privateKey=" + this.formData.privateKey).then(res => {
+                        if (res.data.flag) {
+                            this.$message({
+                                message:  res.data.message,
+                                type: 'success',
+                            })
+                            this.myDataList=res.data.data;
+                        }else{
+                            this.$message({
+                                message:  res.data.message,
+                                type: 'error',
+                            })
+                        }
+                    })
+                })
+            },
+            handleRent(row) {
+                this.signCarFormData.chainNumber=row.chainNumber;
+                this.signCarFormData.price=row.price;
+                    this.$confirm('此操作将租用该车, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.resetForm();
+                        this.dialogFormVisible4Rent = true;
+                        this.$refs['dataRentForm'].validate((valid) => {
+                            this.trueRent();
+
+                        });
+                        // 点击确定后调用
+                    }).catch(() => {
+                        // 点击取消后调用
+                        // 空着，防止报错
+                    });
+
+            },
+            trueRent(){
+                axios.post('/contract/signVehicle',this.signCarFormData).then(res => {
+                    this.dialogFormVisible4Rent = false;
+                    this.$message({
+                        message: res.data.message,
+                        type: res.data.flag ? "success" : "error"
+                    })
+                    if (res.data.flag) {
+                        // 成功
+                        // 刷新列表数据
+                        this.findPage();
+                    }
+                })
+            },
+            getBalance() {
+                this.$refs['dataEditForm'].validate((valid) => {
+                    axios.post("/user/getBalance?address=" + this.formData.address).then(res => {
+                        if (res.data.flag) {
+                            this.dialogFormVisible4Edit=false;
+                            this.$message({
+                                message: "您的余额为：" + res.data.data,
+                                type: 'success',
+                                showClose: true,
+                                duration: 0
+                            })
+                        }
+                    })
+                })
+            }
+        }
+    })
+</script>
+</html>

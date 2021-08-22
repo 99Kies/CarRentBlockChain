@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员页面</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../../static/car/plugins/elementui/index.css">
+    <link rel="stylesheet" href="../../../static/car/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link
+            rel="stylesheet"
+            type="text/css"
+            href="../../../static/build/main_css.bundle.css"
+    />
+
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
+</head>
+<body>
+{% include "nav.html" %}
+<div id="app" style="width: 80%;margin: auto;border-top-width: 50px;padding-top: 50px;">
+    <div class="filter-container">
+        <el-input placeholder="用户地址" v-model="account" style="width: 400px;"
+                  class="filter-item"></el-input>
+        <el-button @click="checkIdentity()" class="dalfBut">鉴别身份</el-button>
+    </div>
+    <div class="user">
+        <p style="font-weight: 700;text-align: center">用户列表</p>
+        <el-table size="small" current-row-key="id" :data="userDataList" stripe highlight-current-row>
+            <el-table-column type="index" align="center" label="序号"></el-table-column>
+            <el-table-column prop="account" label="地址" align="center"></el-table-column>
+            <el-table-column prop="name" label="用户名" align="center"></el-table-column>
+            <el-table-column prop="chainNumber" label="车链码" align="center"></el-table-column>
+            <el-table-column prop="idCode" label="身份证号" align="center"></el-table-column>
+            <el-table-column prop="phone" label="电话" align="center"></el-table-column>
+        </el-table>
+    </div>
+    <div class="carOwner">
+        <p style="font-weight: 700;text-align: center">车主列表</p>
+        <el-table size="small" current-row-key="id" :data="carOwnerDataList" stripe highlight-current-row>
+            <el-table-column type="index" align="center" label="序号"></el-table-column>
+            <el-table-column prop="account" label="地址" align="center"></el-table-column>
+            <el-table-column prop="name" label="用户名" align="center"></el-table-column>
+            <el-table-column prop="chainNumber" label="车链码" align="center"></el-table-column>
+            <el-table-column prop="idCode" label="身份证号" align="center"></el-table-column>
+            <el-table-column prop="phone" label="电话" align="center"></el-table-column>
+
+        </el-table>
+    </div>
+</div>
+<!-- 引入组件库 -->
+<script src="../../../static/car/js/vue.js"></script>
+<script src="../../../static/car/plugins/elementui/index.js"></script>
+<script type="text/javascript" src="../../../static/car/js/jquery.min.js"></script>
+<script src="../../../static/car/js/axios-0.18.0.js"></script>
+<script>
+    const vue = new Vue({
+        el: "#app",
+        data: {
+            account:"",
+            userDataList: [],//表单数据
+            carOwnerDataList: [],//表单数据
+            formData: {},
+            dialogFormVisible: false//增加表单是否可见
+        },
+        created() {
+            this.findPage();
+            console.log("wee");
+        },
+        methods: {
+            findPage() {
+                axios.get("/admin/user/listUsers").then(res => {
+                    if (res.data) {
+                        this.userDataList = res.data;
+                    }
+                });
+                axios.get("/admin/user/listCarOwners").then(res => {
+                    if (res.data) {
+                        this.carOwnerDataList = res.data;
+                    }
+                })
+            },
+            resetFrom() {
+                this.registerFormData = {}
+            },
+            // 重置表单
+            resetForm() {
+                this.formData = {};
+            },
+            //鉴别身份
+            checkIdentity(){
+               axios.get("/admin/is_user/"+this.account).then(res=>{
+                   if (res.data) {
+                       this.$message.success("鉴定为租车用户身份");
+                   }else {
+                       axios.get("/admin/is_carowner/" + this.account).then(res => {
+                           if (res.data) {
+                               this.$message.success("鉴定为车主身份");
+                           } else {
+                               this.$message.error("该用户未注册身份");
+                           }
+                       })
+                   }
+               })
+            }
+        }
+    })
+</script>
+</body>
+</html>

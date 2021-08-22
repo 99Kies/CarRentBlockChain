@@ -1,0 +1,25 @@
+html,body {
+    /* overflow-y: scroll; */
+    margin: 0;
+
+}
+#app{
+    width: 700px;
+    height:400px;
+    margin:150px auto
+}
+.adminLoginButton{
+    float: right;
+}
+.login{
+    float: left;
+    background-color: #fff;
+    height: 300px;
+    width: 300px;
+}
+.register{
+    float: right;
+    background-color: #fff;
+    height: 300px;
+    width: 300px;
+}
